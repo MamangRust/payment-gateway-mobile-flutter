@@ -1,128 +1,126 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/pages/withdraw/withdrawdetail.dart';
 
-class WithdrawHistoryPage extends StatelessWidget {
-  final List<Map<String, String>> withdrawHistory = [
+class WithdrawHistoryScreen extends StatelessWidget {
+  final List<Map<String, dynamic>> withdrawHistory = [
     {
-      "method": "Bank Transfer",
-      "amount": "Rp 1.000.000",
-      "date": "20 Des 2024",
+      "id": "WD12345",
+      "bank": "BCA",
+      "account": "1234567890",
+      "amount": 500000,
+      "date": "2025-02-26",
+      "status": "Success",
     },
     {
-      "method": "E-Wallet",
-      "amount": "Rp 500.000",
-      "date": "18 Des 2024",
+      "id": "WD67890",
+      "bank": "Mandiri",
+      "account": "9876543210",
+      "amount": 1000000,
+      "date": "2025-02-25",
+      "status": "Pending",
     },
     {
-      "method": "ATM",
-      "amount": "Rp 300.000",
-      "date": "15 Des 2024",
-    },
-    {
-      "method": "Bank Transfer",
-      "amount": "Rp 800.000",
-      "date": "10 Des 2024",
+      "id": "WD54321",
+      "bank": "BNI",
+      "account": "5432167890",
+      "amount": 200000,
+      "date": "2025-02-24",
+      "status": "Failed",
     },
   ];
-
-  WithdrawHistoryPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        title: const Text(
-          'Withdraw History',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-        ),
-        backgroundColor: Colors.teal,
+        title: Text('Withdraw History',
+            style: TextStyle(fontWeight: FontWeight.bold)),
+        centerTitle: true,
+        backgroundColor: Colors.white,
         elevation: 0,
+        iconTheme: IconThemeData(color: Colors.black),
       ),
+      backgroundColor: const Color(0xFFF5F9FF),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(16),
         child: ListView.builder(
           itemCount: withdrawHistory.length,
           itemBuilder: (context, index) {
-            final withdraw = withdrawHistory[index];
-            return _buildWithdrawCard(
-              method: withdraw["method"]!,
-              amount: withdraw["amount"]!,
-              date: withdraw["date"]!,
+            final transaction = withdrawHistory[index];
+            Color statusColor = transaction['status'] == "Success"
+                ? Colors.green
+                : transaction['status'] == "Pending"
+                    ? Colors.orange
+                    : Colors.red;
+
+            return Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              color: Colors.white,
+              elevation: 4,
+              shadowColor: Colors.grey.withOpacity(0.2),
+              child: ListTile(
+                contentPadding: EdgeInsets.all(16),
+                leading: Container(
+                  padding: EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(Icons.account_balance_wallet,
+                      color: Colors.blue, size: 28),
+                ),
+                title: Text(
+                  "Rp ${transaction['amount'].toString()}",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                subtitle: Text(
+                  "${transaction['bank']} - ${transaction['date']}",
+                  style: TextStyle(color: Colors.grey),
+                ),
+                trailing: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: statusColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        transaction['status'],
+                        style: TextStyle(
+                            color: statusColor, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    SizedBox(height: 6),
+                    InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                WithdrawDetailScreen(transaction),
+                          ),
+                        );
+                      },
+                      child: Text(
+                        "View Details",
+                        style: TextStyle(
+                          color: Colors.blue,
+                          fontWeight: FontWeight.bold,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             );
           },
         ),
-      ),
-    );
-  }
-
-  Widget _buildWithdrawCard({
-    required String method,
-    required String amount,
-    required String date,
-  }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          // Icon Metode Withdraw
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.teal.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(
-              Icons.account_balance_wallet_rounded,
-              size: 28,
-              color: Colors.teal,
-            ),
-          ),
-          const SizedBox(width: 16),
-          // Detail Withdraw
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  method,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  date,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[500],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // Jumlah Withdraw
-          Text(
-            amount,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.teal,
-            ),
-          ),
-        ],
       ),
     );
   }

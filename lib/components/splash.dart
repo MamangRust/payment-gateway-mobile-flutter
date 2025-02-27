@@ -58,7 +58,7 @@ class _SplashScreenState extends State<SplashScreen>
     _controller.forward();
 
     Timer(const Duration(seconds: 3), () {
-      context.goNamed("home");
+      context.goNamed("main");
     });
   }
 
@@ -77,8 +77,8 @@ class _SplashScreenState extends State<SplashScreen>
             begin: Alignment.topRight,
             end: Alignment.bottomLeft,
             colors: [
-              Colors.teal.shade400,
-              Colors.teal.shade800,
+              Colors.blue.shade400,
+              Colors.lightBlue.shade800,
             ],
           ),
         ),
@@ -146,7 +146,7 @@ class _SplashScreenState extends State<SplashScreen>
                             child: const Icon(
                               Icons.account_balance_wallet,
                               size: 60,
-                              color: Colors.teal,
+                              color: Colors.blue,
                             ),
                           ),
                         ),

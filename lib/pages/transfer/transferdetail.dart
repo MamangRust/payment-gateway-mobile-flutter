@@ -1,164 +1,105 @@
 import 'package:flutter/material.dart';
 
-class TransferDetailPage extends StatefulWidget {
-  const TransferDetailPage({Key? key}) : super(key: key);
+class TransferDetailScreen extends StatelessWidget {
+  final Map<String, dynamic> transaction;
 
-  @override
-  State<TransferDetailPage> createState() => _TransferDetailPageState();
-}
-
-class _TransferDetailPageState extends State<TransferDetailPage> {
-  String selectedMethod = "Bank Transfer";
-  final TextEditingController recipientController = TextEditingController();
-  final TextEditingController amountController = TextEditingController();
-
-  final List<String> transferMethods = [
-    "Bank Transfer",
-    "E-Wallet",
-    "Credit/Debit Card",
-    "Cryptocurrency",
-  ];
+  TransferDetailScreen({required this.transaction});
 
   @override
   Widget build(BuildContext context) {
+    Color statusColor = transaction['status'] == "Success"
+        ? Colors.green
+        : transaction['status'] == "Pending"
+            ? Colors.orange
+            : Colors.red;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Transfer Details',
-          style: TextStyle(fontWeight: FontWeight.w600),
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        backgroundColor: Colors.teal,
+        centerTitle: true,
+        backgroundColor: Colors.white,
         elevation: 0,
+        iconTheme: IconThemeData(color: Colors.black),
       ),
+      backgroundColor: const Color(0xFFF5F9FF),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Dropdown untuk metode transfer
-            const Text(
-              'Select Transfer Method',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
+            Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
               ),
-            ),
-            const SizedBox(height: 8),
-            DropdownButtonFormField<String>(
-              value: selectedMethod,
-              items: transferMethods.map((method) {
-                return DropdownMenuItem(
-                  value: method,
-                  child: Text(method),
-                );
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  selectedMethod = value!;
-                });
-              },
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: Colors.grey[100],
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
+              color: Colors.white,
+              elevation: 4,
+              shadowColor: Colors.grey.withOpacity(0.2),
+              child: Padding(
+                padding: EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Transaction ID: ${transaction['id']?.toString() ?? '-'}",
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    Divider(),
+                    _buildDetailRow(Icons.person, "Recipient",
+                        transaction['recipient']?.toString() ?? '-'),
+                    _buildDetailRow(Icons.account_balance, "Bank",
+                        transaction['bank']?.toString() ?? '-'),
+                    _buildDetailRow(Icons.account_circle, "Account Number",
+                        transaction['account']?.toString() ?? '-'),
+                    _buildDetailRow(Icons.monetization_on, "Amount",
+                        "Rp ${transaction['amount']?.toString() ?? '0'}"),
+                    _buildDetailRow(Icons.date_range, "Date",
+                        transaction['date']?.toString() ?? '-'),
+                    SizedBox(height: 12),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text("Status",
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold)),
+                        Container(
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: statusColor.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            transaction['status']?.toString() ?? '-',
+                            style: TextStyle(
+                                color: statusColor,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ),
-
-            const SizedBox(height: 24),
-
-            // Input untuk nama penerima
-            const Text(
-              'Recipient Name',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: recipientController,
-              decoration: InputDecoration(
-                hintText: 'Enter recipient name',
-                filled: true,
-                fillColor: Colors.grey[100],
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            // Input untuk jumlah transfer
-            const Text(
-              'Transfer Amount',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: amountController,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                hintText: 'Enter amount',
-                prefixText: 'Rp ',
-                filled: true,
-                fillColor: Colors.grey[100],
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
-
-            const Spacer(),
-
-            // Tombol Submit
+            Spacer(),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
+                onPressed: () => Navigator.pop(context),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal,
+                  backgroundColor: Colors.blue,
+                  padding: EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
-                onPressed: () {
-                  if (recipientController.text.isNotEmpty &&
-                      amountController.text.isNotEmpty) {
-                    Navigator.push(
-                      context,
-                      PageRouteBuilder(
-                        transitionDuration: const Duration(milliseconds: 500),
-                        pageBuilder: (_, __, ___) => ConfirmationPage(
-                          method: selectedMethod,
-                          recipient: recipientController.text,
-                          amount: amountController.text,
-                        ),
-                        transitionsBuilder:
-                            (_, animation, secondaryAnimation, child) {
-                          return SlideTransition(
-                            position: Tween<Offset>(
-                              begin: const Offset(1.0, 0.0),
-                              end: Offset.zero,
-                            ).animate(animation),
-                            child: child,
-                          );
-                        },
-                      ),
-                    );
-                  }
-                },
-                child: const Text(
-                  'Continue',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                child: Text(
+                  "Back",
+                  style: TextStyle(fontSize: 16, color: Colors.white),
                 ),
               ),
             ),
@@ -167,84 +108,21 @@ class _TransferDetailPageState extends State<TransferDetailPage> {
       ),
     );
   }
-}
 
-class ConfirmationPage extends StatelessWidget {
-  final String method;
-  final String recipient;
-  final String amount;
-
-  const ConfirmationPage({
-    Key? key,
-    required this.method,
-    required this.recipient,
-    required this.amount,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Confirmation'),
-        backgroundColor: Colors.teal,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Transfer Summary',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text('Method:', style: TextStyle(fontSize: 16)),
-                Text(method, style: const TextStyle(fontSize: 16)),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text('Recipient:', style: TextStyle(fontSize: 16)),
-                Text(recipient, style: const TextStyle(fontSize: 16)),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text('Amount:', style: TextStyle(fontSize: 16)),
-                Text('Rp $amount', style: const TextStyle(fontSize: 16)),
-              ],
-            ),
-            const Spacer(),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.teal,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                padding: const EdgeInsets.symmetric(vertical: 16),
-              ),
-              onPressed: () {
-                Navigator.popUntil(context, (route) => route.isFirst);
-              },
-              child: const Center(
-                child: Text(
-                  'Confirm Transfer',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
-          ],
-        ),
+  Widget _buildDetailRow(IconData icon, String title, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.blue, size: 24),
+          SizedBox(width: 12),
+          Expanded(
+            child: Text(title,
+                style: TextStyle(fontSize: 14, color: Colors.grey.shade600)),
+          ),
+          Text(value,
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        ],
       ),
     );
   }

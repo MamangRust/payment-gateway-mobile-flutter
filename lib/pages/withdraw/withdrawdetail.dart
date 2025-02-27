@@ -1,149 +1,100 @@
 import 'package:flutter/material.dart';
 
-class WithdrawDetailPage extends StatefulWidget {
-  const WithdrawDetailPage({Key? key}) : super(key: key);
+class WithdrawDetailScreen extends StatelessWidget {
+  final Map<String, dynamic> transaction;
 
-  @override
-  State<WithdrawDetailPage> createState() => _WithdrawDetailPageState();
-}
-
-class _WithdrawDetailPageState extends State<WithdrawDetailPage> {
-  final TextEditingController cardNumberController = TextEditingController();
-  final TextEditingController withdrawAmountController =
-      TextEditingController();
-  final TextEditingController withdrawTimeController = TextEditingController();
+  WithdrawDetailScreen(this.transaction);
 
   @override
   Widget build(BuildContext context) {
+    Color statusColor = transaction['status'] == "Success"
+        ? Colors.green
+        : transaction['status'] == "Pending"
+            ? Colors.orange
+            : Colors.red;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Withdraw Details',
-          style: TextStyle(fontWeight: FontWeight.w600),
+        title: Text(
+          'Withdraw Detail',
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        backgroundColor: Colors.teal,
+        centerTitle: true,
+        backgroundColor: Colors.white,
         elevation: 0,
+        iconTheme: IconThemeData(color: Colors.black),
       ),
+      backgroundColor: const Color(0xFFF5F9FF),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Input untuk nomor kartu
-            const Text(
-              'Card Number',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
+            Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
               ),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: cardNumberController,
-              decoration: InputDecoration(
-                hintText: 'Enter your card number',
-                filled: true,
-                fillColor: Colors.grey[100],
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
+              color: Colors.white,
+              elevation: 4,
+              shadowColor: Colors.grey.withOpacity(0.2),
+              child: Padding(
+                padding: EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Transaction ID: ${transaction['id']}",
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    Divider(),
+                    _buildDetailRow("Bank", transaction['bank']),
+                    _buildDetailRow("Account Number", transaction['account']),
+                    _buildDetailRow(
+                        "Amount", "Rp ${transaction['amount'].toString()}"),
+                    _buildDetailRow("Date", transaction['date']),
+                    SizedBox(height: 12),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text("Status",
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold)),
+                        Container(
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: statusColor.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            transaction['status'],
+                            style: TextStyle(
+                                color: statusColor,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ),
-
-            const SizedBox(height: 24),
-
-            // Input untuk jumlah withdraw
-            const Text(
-              'Withdraw Amount',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: withdrawAmountController,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                hintText: 'Enter withdraw amount',
-                prefixText: 'Rp ',
-                filled: true,
-                fillColor: Colors.grey[100],
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            // Input untuk waktu withdraw
-            const Text(
-              'Withdraw Time',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: withdrawTimeController,
-              decoration: InputDecoration(
-                hintText: 'Enter withdraw time (e.g., 10:00 AM)',
-                filled: true,
-                fillColor: Colors.grey[100],
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
-
-            const Spacer(),
-
-            // Tombol Submit
+            Spacer(),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
+                onPressed: () => Navigator.pop(context),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal,
+                  backgroundColor: Colors.blue,
+                  padding: EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
-                onPressed: () {
-                  if (cardNumberController.text.isNotEmpty &&
-                      withdrawAmountController.text.isNotEmpty &&
-                      withdrawTimeController.text.isNotEmpty) {
-                    Navigator.push(
-                      context,
-                      PageRouteBuilder(
-                        transitionDuration: const Duration(milliseconds: 500),
-                        pageBuilder: (_, __, ___) => WithdrawConfirmationPage(
-                          cardNumber: cardNumberController.text,
-                          withdrawAmount: withdrawAmountController.text,
-                          withdrawTime: withdrawTimeController.text,
-                        ),
-                        transitionsBuilder:
-                            (_, animation, secondaryAnimation, child) {
-                          return SlideTransition(
-                            position: Tween<Offset>(
-                              begin: const Offset(1.0, 0.0),
-                              end: Offset.zero,
-                            ).animate(animation),
-                            child: child,
-                          );
-                        },
-                      ),
-                    );
-                  }
-                },
-                child: const Text(
-                  'Continue',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                child: Text(
+                  "Back",
+                  style: TextStyle(fontSize: 16, color: Colors.white),
                 ),
               ),
             ),
@@ -152,85 +103,17 @@ class _WithdrawDetailPageState extends State<WithdrawDetailPage> {
       ),
     );
   }
-}
 
-class WithdrawConfirmationPage extends StatelessWidget {
-  final String cardNumber;
-  final String withdrawAmount;
-  final String withdrawTime;
-
-  const WithdrawConfirmationPage({
-    Key? key,
-    required this.cardNumber,
-    required this.withdrawAmount,
-    required this.withdrawTime,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Confirmation'),
-        backgroundColor: Colors.teal,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Withdraw Summary',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text('Card Number:', style: TextStyle(fontSize: 16)),
-                Text(cardNumber, style: const TextStyle(fontSize: 16)),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text('Withdraw Amount:', style: TextStyle(fontSize: 16)),
-                Text('Rp $withdrawAmount',
-                    style: const TextStyle(fontSize: 16)),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text('Withdraw Time:', style: TextStyle(fontSize: 16)),
-                Text(withdrawTime, style: const TextStyle(fontSize: 16)),
-              ],
-            ),
-            const Spacer(),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.teal,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                padding: const EdgeInsets.symmetric(vertical: 16),
-              ),
-              onPressed: () {
-                Navigator.popUntil(context, (route) => route.isFirst);
-              },
-              child: const Center(
-                child: Text(
-                  'Confirm Withdraw',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
-          ],
-        ),
+  Widget _buildDetailRow(String title, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(title,
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+          Text(value, style: TextStyle(fontSize: 16)),
+        ],
       ),
     );
   }

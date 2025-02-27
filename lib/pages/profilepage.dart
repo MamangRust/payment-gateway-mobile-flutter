@@ -1,367 +1,183 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
-class ProfilePage extends StatelessWidget {
-  const ProfilePage({Key? key}) : super(key: key);
+class ProfileScreen extends StatefulWidget {
+  @override
+  _ProfileScreenState createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  int _selectedIndex = 0;
+  bool emailNotifications = true;
+  bool pushNotifications = true;
+  bool smsNotifications = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          // Modern Profile AppBar
-          SliverAppBar(
-            expandedHeight: 200.0,
-            floating: false,
-            pinned: true,
-            backgroundColor: Colors.transparent,
-            flexibleSpace: FlexibleSpaceBar(
-              background: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topRight,
-                    end: Alignment.bottomLeft,
-                    colors: [
-                      Colors.teal.shade400,
-                      Colors.teal.shade800,
-                    ],
-                  ),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const SizedBox(height: 40),
-                    // Profile Picture with Edit Button
-                    Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Container(
-                          width: 100,
-                          height: 100,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: Colors.white,
-                              width: 3,
-                            ),
-                          ),
-                          child: const CircleAvatar(
-                            radius: 48,
-                            backgroundColor: Colors.white24,
-                            child: Icon(
-                              Icons.person,
-                              size: 50,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          bottom: 0,
-                          right: 0,
-                          child: Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: const BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              Icons.camera_alt,
-                              size: 20,
-                              color: Colors.teal.shade800,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new),
-              onPressed: () => {context.goNamed("home")},
-            ),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.edit_outlined),
-                onPressed: () {
-                  // Edit profile action
-                },
-              ),
-              const SizedBox(width: 8),
-            ],
-          ),
-
-          // Profile Content
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Personal Information Section
-                  _buildSectionTitle('Personal Information'),
-                  const SizedBox(height: 16),
-                  _buildInfoCard(
-                    children: [
-                      _buildProfileField(
-                        icon: Icons.person_outline,
-                        label: 'First Name',
-                        value: 'John',
-                      ),
-                      const Divider(height: 24),
-                      _buildProfileField(
-                        icon: Icons.person_outline,
-                        label: 'Last Name',
-                        value: 'Doe',
-                      ),
-                      const Divider(height: 24),
-                      _buildProfileField(
-                        icon: Icons.email_outlined,
-                        label: 'Email',
-                        value: 'john.doe@example.com',
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 32),
-
-                  // Settings Section
-                  _buildSectionTitle('Settings'),
-                  const SizedBox(height: 16),
-                  _buildSettingsCard(),
-
-                  const SizedBox(height: 32),
-
-                  // Action Buttons
-                  _buildActionButton(
-                    icon: Icons.security,
-                    label: 'Security Settings',
-                    onTap: () {
-                      // Navigate to security settings
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  _buildActionButton(
-                    icon: Icons.help_outline,
-                    label: 'Help & Support',
-                    onTap: () {
-                      // Navigate to help & support
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  _buildActionButton(
-                    icon: Icons.logout,
-                    label: 'Logout',
-                    isDestructive: true,
-                    onTap: () {
-                      // Logout action
-                    },
-                  ),
-                ],
-              ),
-            ),
+      appBar: AppBar(title: Text("Profile")),
+      backgroundColor: const Color(0xFFF5F9FF),
+      body: Column(
+        children: [
+          _buildProfileHeader(),
+          Expanded(
+            child: _buildTabContent(),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildSectionTitle(String title) {
-    return Text(
-      title,
-      style: const TextStyle(
-        fontSize: 20,
-        fontWeight: FontWeight.bold,
-        color: Colors.black87,
-      ),
-    );
-  }
-
-  Widget _buildInfoCard({required List<Widget> children}) {
+  Widget _buildProfileHeader() {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
+          color: Colors.white, borderRadius: BorderRadius.circular(12)),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          CircleAvatar(
+            radius: 40,
+            backgroundImage: NetworkImage(
+                "https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=400&h=400&q=80"),
           ),
+          SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("John Doe",
+                    style:
+                        TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                Text("john.doe@example.com",
+                    style: TextStyle(color: Colors.grey)),
+                Text("Member since January 2024",
+                    style: TextStyle(color: Colors.grey, fontSize: 12)),
+              ],
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {},
+            child: Text("Edit Profile"),
+            style: ElevatedButton.styleFrom(
+              foregroundColor: Colors.black,
+            ),
+          )
         ],
-      ),
-      child: Column(
-        children: children,
       ),
     );
   }
 
-  Widget _buildProfileField({
-    required IconData icon,
-    required String label,
-    required String value,
-  }) {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.teal.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Icon(icon, color: Colors.teal, size: 20),
+  Widget _buildTabContent() {
+    switch (_selectedIndex) {
+      case 0:
+        return _buildPersonalInfo();
+      case 1:
+        return _buildSecurityInfo();
+      case 2:
+        return _buildPreferences();
+      default:
+        return Container();
+    }
+  }
+
+  Widget _buildPersonalInfo() {
+    return Card(
+      elevation: 3,
+      color: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text("Personal Information",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Divider(),
+            ListTile(
+              leading: Icon(Icons.person, color: Colors.blue),
+              title: Text("Full Name",
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              subtitle: Text("John Doe"),
+            ),
+            ListTile(
+              leading: Icon(Icons.email, color: Colors.green),
+              title:
+                  Text("Email", style: TextStyle(fontWeight: FontWeight.bold)),
+              subtitle: Text("john.doe@example.com"),
+            ),
+            ListTile(
+              leading: Icon(Icons.phone, color: Colors.orange),
+              title:
+                  Text("Phone", style: TextStyle(fontWeight: FontWeight.bold)),
+              subtitle: Text("+62 812 3456 7890"),
+            ),
+          ],
         ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[600],
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                value,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
+      ),
+    );
+  }
+
+  Widget _buildSecurityInfo() {
+    return ListView(
+      padding: EdgeInsets.all(16),
+      children: [
+        ListTile(
+          leading: Icon(Icons.lock),
+          title: Text("Password"),
+          subtitle: Text("Last changed 3 months ago"),
+          trailing: TextButton(onPressed: () {}, child: Text("Change")),
+        ),
+        ListTile(
+          leading: Icon(Icons.security),
+          title: Text("Two-Factor Authentication"),
+          subtitle: Text("Not enabled"),
+          trailing: TextButton(onPressed: () {}, child: Text("Enable")),
         ),
       ],
     );
   }
 
-  Widget _buildSettingsCard() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          _buildSettingsTile(
-            icon: Icons.notifications_outlined,
-            title: 'Notifications',
-            subtitle: 'Manage your notifications',
-            onTap: () {},
-          ),
-          const Divider(height: 1),
-          _buildSettingsTile(
-            icon: Icons.lock_outline,
-            title: 'Privacy',
-            subtitle: 'Manage your privacy settings',
-            onTap: () {},
-          ),
-          const Divider(height: 1),
-          _buildSettingsTile(
-            icon: Icons.language,
-            title: 'Language',
-            subtitle: 'Change app language',
-            onTap: () {},
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSettingsTile({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required VoidCallback onTap,
-  }) {
-    return ListTile(
-      leading: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: Colors.teal.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Icon(icon, color: Colors.teal, size: 20),
-      ),
-      title: Text(
-        title,
-        style: const TextStyle(
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-      subtitle: Text(
-        subtitle,
-        style: TextStyle(
-          color: Colors.grey[600],
-          fontSize: 12,
-        ),
-      ),
-      trailing: const Icon(Icons.chevron_right),
-      onTap: onTap,
-    );
-  }
-
-  Widget _buildActionButton({
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-    bool isDestructive = false,
-  }) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(15),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-          decoration: BoxDecoration(
-            color: isDestructive ? Colors.red.withOpacity(0.1) : Colors.white,
-            borderRadius: BorderRadius.circular(15),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Icon(
-                icon,
-                color: isDestructive ? Colors.red : Colors.teal,
-                size: 24,
-              ),
-              const SizedBox(width: 16),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: isDestructive ? Colors.red : Colors.black87,
-                ),
-              ),
-              const Spacer(),
-              Icon(
-                Icons.chevron_right,
-                color: isDestructive ? Colors.red : Colors.grey,
-              ),
-            ],
+  Widget _buildPreferences() {
+    return ListView(
+      padding: EdgeInsets.all(16),
+      children: [
+        ListTile(
+          leading: Icon(Icons.notifications),
+          title: Text("Email notifications"),
+          trailing: Switch(
+            value: emailNotifications,
+            onChanged: (value) {
+              setState(() {
+                emailNotifications = value;
+              });
+            },
           ),
         ),
-      ),
+        ListTile(
+          leading: Icon(Icons.phone_android),
+          title: Text("Push notifications"),
+          trailing: Switch(
+            value: pushNotifications,
+            onChanged: (value) {
+              setState(() {
+                pushNotifications = value;
+              });
+            },
+          ),
+        ),
+        ListTile(
+          leading: Icon(Icons.sms),
+          title: Text("SMS notifications"),
+          trailing: Switch(
+            value: smsNotifications,
+            onChanged: (value) {
+              setState(() {
+                smsNotifications = value;
+              });
+            },
+          ),
+        ),
+      ],
     );
   }
 }
