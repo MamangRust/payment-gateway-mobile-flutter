@@ -87,7 +87,6 @@ class _SplashScreenState extends State<SplashScreen>
           builder: (context, child) {
             return Stack(
               children: [
-                // Animated Background Elements
                 Positioned(
                   top: -100,
                   right: -100,
@@ -118,13 +117,10 @@ class _SplashScreenState extends State<SplashScreen>
                     ),
                   ),
                 ),
-
-                // Main Content
                 Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Logo
                       Transform.scale(
                         scale: _scaleAnimation.value,
                         child: FadeTransition(
@@ -152,8 +148,6 @@ class _SplashScreenState extends State<SplashScreen>
                         ),
                       ),
                       const SizedBox(height: 24),
-
-                      // App Name
                       Transform.translate(
                         offset: Offset(0, _slideAnimation.value),
                         child: FadeTransition(
@@ -170,8 +164,6 @@ class _SplashScreenState extends State<SplashScreen>
                         ),
                       ),
                       const SizedBox(height: 8),
-
-                      // Tagline
                       Transform.translate(
                         offset: Offset(0, _slideAnimation.value),
                         child: FadeTransition(
@@ -189,8 +181,6 @@ class _SplashScreenState extends State<SplashScreen>
                     ],
                   ),
                 ),
-
-                // Loading Indicator
                 Positioned(
                   bottom: 100,
                   left: 0,
