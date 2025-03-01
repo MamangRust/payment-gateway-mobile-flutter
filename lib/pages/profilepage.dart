@@ -1,24 +1,39 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mobile/store/auth.dart';
 
-class ProfileScreen extends StatefulWidget {
+class ProfileScreen extends ConsumerStatefulWidget {
   @override
   _ProfileScreenState createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   int _selectedIndex = 0;
   bool emailNotifications = true;
   bool pushNotifications = true;
   bool smsNotifications = false;
 
   @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      final authState = ref.read(authProvider);
+      if (authState.isAuthenticated && authState.accessToken != null) {
+        ref.read(userProvider.notifier).fetchUser();
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final user = ref.watch(userProvider);
+
     return Scaffold(
-      appBar: AppBar(title: Text("Profile")),
+      appBar: AppBar(title: const Text("Profile")),
       backgroundColor: const Color(0xFFF5F9FF),
       body: Column(
         children: [
-          _buildProfileHeader(),
+          _buildProfileHeader(user),
           Expanded(
             child: _buildTabContent(),
           ),
@@ -27,9 +42,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildProfileHeader() {
+  Widget _buildProfileHeader(UserState user) {
     return Container(
-      padding: EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
           color: Colors.white, borderRadius: BorderRadius.circular(12)),
       child: Row(
@@ -38,26 +53,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
           CircleAvatar(
             radius: 40,
             backgroundImage: NetworkImage(
-                "https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=400&h=400&q=80"),
+                "https://avatars.githubusercontent.com/u/46998157?v=4"),
           ),
-          SizedBox(width: 16),
+          const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("John Doe",
-                    style:
-                        TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                Text("john.doe@example.com",
-                    style: TextStyle(color: Colors.grey)),
-                Text("Member since January 2024",
+                Text(
+                  user.firstName != null
+                      ? "${user.firstName} ${user.lastName ?? ''}"
+                      : "Loading...",
+                  style: const TextStyle(
+                      fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  user.email ?? "Loading...",
+                  style: const TextStyle(color: Colors.grey),
+                ),
+                const Text("Member since January 2024",
                     style: TextStyle(color: Colors.grey, fontSize: 12)),
               ],
             ),
           ),
           ElevatedButton(
             onPressed: () {},
-            child: Text("Edit Profile"),
+            child: const Text("Edit Profile"),
             style: ElevatedButton.styleFrom(
               foregroundColor: Colors.black,
             ),
@@ -81,6 +102,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildPersonalInfo() {
+    final user = ref.watch(userProvider);
+
     return Card(
       elevation: 3,
       color: Colors.white,
@@ -94,22 +117,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const Divider(),
             ListTile(
-              leading: Icon(Icons.person, color: Colors.blue),
-              title: Text("Full Name",
+              leading: const Icon(Icons.person, color: Colors.blue),
+              title: const Text("Full Name",
                   style: TextStyle(fontWeight: FontWeight.bold)),
-              subtitle: Text("John Doe"),
+              subtitle: Text(user.firstName != null
+                  ? "${user.firstName} ${user.lastName ?? ''}"
+                  : "Loading..."),
             ),
             ListTile(
-              leading: Icon(Icons.email, color: Colors.green),
-              title:
-                  Text("Email", style: TextStyle(fontWeight: FontWeight.bold)),
-              subtitle: Text("john.doe@example.com"),
-            ),
-            ListTile(
-              leading: Icon(Icons.phone, color: Colors.orange),
-              title:
-                  Text("Phone", style: TextStyle(fontWeight: FontWeight.bold)),
-              subtitle: Text("+62 812 3456 7890"),
+              leading: const Icon(Icons.email, color: Colors.green),
+              title: const Text("Email",
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              subtitle: Text(user.email ?? "Loading..."),
             ),
           ],
         ),
@@ -119,19 +138,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildSecurityInfo() {
     return ListView(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       children: [
         ListTile(
-          leading: Icon(Icons.lock),
-          title: Text("Password"),
-          subtitle: Text("Last changed 3 months ago"),
-          trailing: TextButton(onPressed: () {}, child: Text("Change")),
+          leading: const Icon(Icons.lock),
+          title: const Text("Password"),
+          subtitle: const Text("Last changed 3 months ago"),
+          trailing: TextButton(onPressed: () {}, child: const Text("Change")),
         ),
         ListTile(
-          leading: Icon(Icons.security),
-          title: Text("Two-Factor Authentication"),
-          subtitle: Text("Not enabled"),
-          trailing: TextButton(onPressed: () {}, child: Text("Enable")),
+          leading: const Icon(Icons.security),
+          title: const Text("Two-Factor Authentication"),
+          subtitle: const Text("Not enabled"),
+          trailing: TextButton(onPressed: () {}, child: const Text("Enable")),
         ),
       ],
     );
@@ -139,11 +158,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildPreferences() {
     return ListView(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       children: [
         ListTile(
-          leading: Icon(Icons.notifications),
-          title: Text("Email notifications"),
+          leading: const Icon(Icons.notifications),
+          title: const Text("Email notifications"),
           trailing: Switch(
             value: emailNotifications,
             onChanged: (value) {
@@ -154,8 +173,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
         ListTile(
-          leading: Icon(Icons.phone_android),
-          title: Text("Push notifications"),
+          leading: const Icon(Icons.phone_android),
+          title: const Text("Push notifications"),
           trailing: Switch(
             value: pushNotifications,
             onChanged: (value) {
@@ -166,8 +185,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
         ListTile(
-          leading: Icon(Icons.sms),
-          title: Text("SMS notifications"),
+          leading: const Icon(Icons.sms),
+          title: const Text("SMS notifications"),
           trailing: Switch(
             value: smsNotifications,
             onChanged: (value) {

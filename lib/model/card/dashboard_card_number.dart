@@ -1,24 +1,21 @@
-import 'package:mobile/model/card/dashboard_card.dart';
-
-class DashboardCardCardNumber extends DashboardCard {
+class DashboardCardCardNumber {
+  final double? totalBalance;
+  final double? totalTopup;
+  final double? totalWithdraw;
+  final double? totalTransaction;
+  final double? totalTransfer;
   final double? totalTransferSend;
   final double? totalTransferReceiver;
 
   DashboardCardCardNumber({
-    double? totalBalance,
-    double? totalTopup,
-    double? totalWithdraw,
-    double? totalTransaction,
-    double? totalTransfer,
+    this.totalBalance,
+    this.totalTopup,
+    this.totalWithdraw,
+    this.totalTransaction,
+    this.totalTransfer,
     this.totalTransferSend,
     this.totalTransferReceiver,
-  }) : super(
-          totalBalance: totalBalance,
-          totalTopup: totalTopup,
-          totalWithdraw: totalWithdraw,
-          totalTransaction: totalTransaction,
-          totalTransfer: totalTransfer,
-        );
+  });
 
   factory DashboardCardCardNumber.fromJson(Map<String, dynamic> json) {
     return DashboardCardCardNumber(
@@ -33,11 +30,15 @@ class DashboardCardCardNumber extends DashboardCard {
     );
   }
 
-  @override
   Map<String, dynamic> toJson() {
-    final json = super.toJson();
-    json['total_transfer_send'] = totalTransferSend;
-    json['total_transfer_receiver'] = totalTransferReceiver;
-    return json;
+    return {
+      'total_balance': totalBalance,
+      'total_topup': totalTopup,
+      'total_withdraw': totalWithdraw,
+      'total_transaction': totalTransaction,
+      'total_transfer': totalTransfer,
+      'total_transfer_send': totalTransferSend,
+      'total_transfer_receiver': totalTransferReceiver,
+    };
   }
 }

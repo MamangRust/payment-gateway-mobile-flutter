@@ -1,17 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/components/auth/custom_button.dart';
+import 'package:mobile/components/auth/custom_social_button.dart';
+import 'package:mobile/components/auth/text_field.dart';
+import 'package:mobile/domain/requests/auth/register.dart';
+import 'package:mobile/store/auth.dart';
+import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class RegisterPage extends StatefulWidget {
-  const RegisterPage({Key? key}) : super(key: key);
+class RegisterScreen extends ConsumerStatefulWidget {
+  const RegisterScreen({Key? key}) : super(key: key);
 
   @override
-  State<RegisterPage> createState() => _RegisterPageState();
+  _RegisterScreenState createState() => _RegisterScreenState();
 }
 
-class _RegisterPageState extends State<RegisterPage> {
+class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
+  final TextEditingController _firstNameController = TextEditingController();
+  final TextEditingController _lastNameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
+
   bool _isPasswordVisible = false;
   bool _acceptTerms = false;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -48,7 +61,6 @@ class _RegisterPageState extends State<RegisterPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Header
                     const Text(
                       'Get Started',
                       style: TextStyle(
@@ -68,8 +80,6 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                     ),
                     const SizedBox(height: 40),
-
-                    // Registration Form
                     Form(
                       key: _formKey,
                       child: Column(
@@ -84,37 +94,57 @@ class _RegisterPageState extends State<RegisterPage> {
                             ),
                           ),
                           const SizedBox(height: 20),
-
-                          // Name Fields - Side by side
                           Row(
                             children: [
                               Expanded(
-                                child: _buildTextField(
+                                child: CustomTextField(
                                   label: 'First Name',
                                   hint: 'John',
+                                  controller: _firstNameController,
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'This field is required';
+                                    }
+                                    return null;
+                                  },
                                 ),
                               ),
                               const SizedBox(width: 16),
                               Expanded(
-                                child: _buildTextField(
+                                child: CustomTextField(
                                   label: 'Last Name',
                                   hint: 'Doe',
+                                  controller: _lastNameController,
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'This field is required';
+                                    }
+                                    return null;
+                                  },
                                 ),
                               ),
                             ],
                           ),
                           const SizedBox(height: 24),
-
-                          // Email
-                          _buildTextField(
+                          CustomTextField(
                             label: 'Email',
                             hint: 'your.email@example.com',
                             prefixIcon: Icons.email_outlined,
+                            controller: _emailController,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'This field is required';
+                              }
+                              if (!RegExp(
+                                      r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$')
+                                  .hasMatch(value)) {
+                                return 'Please enter a valid email address';
+                              }
+                              return null;
+                            },
                           ),
                           const SizedBox(height: 24),
-
-                          // Password
-                          _buildTextField(
+                          CustomTextField(
                             label: 'Password',
                             hint: '••••••••',
                             prefixIcon: Icons.lock_outline,
@@ -125,10 +155,41 @@ class _RegisterPageState extends State<RegisterPage> {
                                 _isPasswordVisible = !_isPasswordVisible;
                               });
                             },
+                            controller: _passwordController,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'This field is required';
+                              }
+                              if (value.length < 8) {
+                                return 'Password must be at least 8 characters long';
+                              }
+                              return null;
+                            },
                           ),
-                          const SizedBox(height: 16),
-
-                          // Password Strength Indicator
+                          const SizedBox(height: 24),
+                          CustomTextField(
+                            label: 'Confirm Password',
+                            hint: '••••••••',
+                            prefixIcon: Icons.lock_outline,
+                            isPassword: true,
+                            isPasswordVisible: _isPasswordVisible,
+                            onPasswordVisibilityToggle: () {
+                              setState(() {
+                                _isPasswordVisible = !_isPasswordVisible;
+                              });
+                            },
+                            controller: _confirmPasswordController,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'This field is required';
+                              }
+                              if (value != _passwordController.text) {
+                                return 'Passwords do not match';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 24),
                           LinearProgressIndicator(
                             value: 0.7,
                             backgroundColor: Colors.grey.withOpacity(0.2),
@@ -146,8 +207,6 @@ class _RegisterPageState extends State<RegisterPage> {
                             ),
                           ),
                           const SizedBox(height: 32),
-
-                          // Terms & Conditions
                           Container(
                             decoration: BoxDecoration(
                               color: const Color(0xFFEFF6FF),
@@ -190,20 +249,45 @@ class _RegisterPageState extends State<RegisterPage> {
                             ),
                           ),
                           const SizedBox(height: 40),
-
-                          // Create Account Button
-                          _buildPrimaryButton(
+                          CustomerButtonPrimary(
                             text: 'Create Account',
-                            onPressed: () {
+                            onPressed: () async {
                               if (_formKey.currentState!.validate() &&
                                   _acceptTerms) {
-                                // Registration logic here
+                                final authNotifier =
+                                    ref.read(authProvider.notifier);
+
+                                try {
+                                  await authNotifier.register(
+                                    RegisterRequest(
+                                      firstname: _firstNameController.text,
+                                      lastname: _lastNameController.text,
+                                      email: _emailController.text,
+                                      password: _passwordController.text,
+                                      confirmPassword:
+                                          _confirmPasswordController.text,
+                                    ),
+                                  );
+
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                          content: Text(
+                                              "Registration successful! Please log in.")),
+                                    );
+                                    context.go('/login');
+                                  }
+                                } catch (e) {
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text(e.toString())),
+                                    );
+                                  }
+                                }
                               }
                             },
                           ),
                           const SizedBox(height: 24),
-
-                          // Social Sign Up Options
                           Center(
                             child: Column(
                               children: [
@@ -218,22 +302,25 @@ class _RegisterPageState extends State<RegisterPage> {
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    _buildSocialButton(
+                                    CustomSocialButton(
                                       icon: Icons.g_mobiledata,
                                       backgroundColor: Colors.white,
                                       iconColor: Colors.red,
+                                      onPressed: () {},
                                     ),
                                     const SizedBox(width: 16),
-                                    _buildSocialButton(
+                                    CustomSocialButton(
                                       icon: Icons.apple,
                                       backgroundColor: Colors.black,
                                       iconColor: Colors.white,
+                                      onPressed: () {},
                                     ),
                                     const SizedBox(width: 16),
-                                    _buildSocialButton(
+                                    CustomSocialButton(
                                       icon: Icons.facebook,
                                       backgroundColor: const Color(0xFF1877F2),
                                       iconColor: Colors.white,
+                                      onPressed: () {},
                                     ),
                                   ],
                                 ),
@@ -241,8 +328,6 @@ class _RegisterPageState extends State<RegisterPage> {
                             ),
                           ),
                           const SizedBox(height: 32),
-
-                          // Already Have Account
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -272,144 +357,6 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTextField({
-    required String label,
-    required String hint,
-    IconData? prefixIcon,
-    bool isPassword = false,
-    bool isPasswordVisible = false,
-    VoidCallback? onPasswordVisibilityToggle,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF334155),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF64748B).withOpacity(0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: TextFormField(
-            obscureText: isPassword && !isPasswordVisible,
-            decoration: InputDecoration(
-              hintText: hint,
-              hintStyle: TextStyle(
-                color: const Color(0xFF94A3B8),
-                fontSize: 14,
-              ),
-              prefixIcon: prefixIcon != null
-                  ? Icon(prefixIcon, color: const Color(0xFF64748B), size: 20)
-                  : null,
-              suffixIcon: isPassword
-                  ? IconButton(
-                      icon: Icon(
-                        isPasswordVisible
-                            ? Icons.visibility_outlined
-                            : Icons.visibility_off_outlined,
-                        color: const Color(0xFF64748B),
-                        size: 20,
-                      ),
-                      onPressed: onPasswordVisibilityToggle,
-                    )
-                  : null,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide.none,
-              ),
-              filled: true,
-              fillColor: Colors.white,
-              contentPadding: const EdgeInsets.symmetric(
-                vertical: 16,
-                horizontal: 20,
-              ),
-            ),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'This field is required';
-              }
-              return null;
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPrimaryButton({
-    required String text,
-    required VoidCallback onPressed,
-  }) {
-    return SizedBox(
-      width: double.infinity,
-      height: 56,
-      child: ElevatedButton(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF2563EB),
-          foregroundColor: Colors.white,
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          shadowColor: const Color(0xFF2563EB).withOpacity(0.3),
-        ),
-        child: Text(
-          text,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSocialButton({
-    required IconData icon,
-    required Color backgroundColor,
-    required Color iconColor,
-  }) {
-    return InkWell(
-      onTap: () {},
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        width: 56,
-        height: 56,
-        decoration: BoxDecoration(
-          color: backgroundColor,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Icon(
-          icon,
-          color: iconColor,
-          size: 28,
         ),
       ),
     );

@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:mobile/pages/analytics.dart';
+import 'package:mobile/pages/auth/login.dart';
+import 'package:mobile/pages/profilepage.dart';
 import 'package:mobile/pages/topup/topup.dart';
 import 'package:mobile/pages/transfer/transfer.dart';
 import 'package:mobile/pages/withdraw/withdraw.dart';
+import 'package:mobile/store/auth.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends ConsumerWidget {
   const HomePage({Key? key}) : super(key: key);
 
   final double balance = 1000000;
@@ -13,10 +17,59 @@ class HomePage extends StatelessWidget {
     return NumberFormat.currency(locale: 'id_ID', symbol: 'Rp').format(amount);
   }
 
+  void _onMenuSelected(BuildContext context, String value, WidgetRef ref) {
+    if (value == 'profile') {
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => ProfileScreen()));
+    } else if (value == 'logout') {
+      ref.read(authProvider.notifier).logout();
+
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => LoginScreen()));
+    }
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      appBar: AppBar(title: Text('Dashboard')),
+      appBar: AppBar(
+        title: Text('Dashboard'),
+        actions: [
+          PopupMenuButton<String>(
+            onSelected: (value) => _onMenuSelected(context, value, ref),
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: 'profile',
+                child: Row(
+                  children: [
+                    Icon(Icons.person, color: Colors.black),
+                    SizedBox(width: 8),
+                    Text('Profile'),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: 'logout',
+                child: Row(
+                  children: [
+                    Icon(Icons.logout, color: Colors.black),
+                    SizedBox(width: 8),
+                    Text('Logout'),
+                  ],
+                ),
+              ),
+            ],
+            child: Padding(
+              padding: const EdgeInsets.only(right: 16.0),
+              child: CircleAvatar(
+                backgroundImage: NetworkImage(
+                    "https://avatars.githubusercontent.com/u/46998157?v=4"),
+                radius: 20,
+              ),
+            ),
+          ),
+        ],
+      ),
       backgroundColor: const Color(0xFFF5F9FF),
       body: Padding(
         padding: EdgeInsets.all(16.0),

@@ -1,7 +1,9 @@
+import 'package:mobile/model/user/user.dart';
+
 class ApiResponseRegister<T> {
   final String status;
   final String message;
-  final T? data;
+  final User? data;
 
   ApiResponseRegister({
     required this.status,
@@ -10,19 +12,20 @@ class ApiResponseRegister<T> {
   });
 
   factory ApiResponseRegister.fromJson(
-      Map<String, dynamic> json, T Function(Map<String, dynamic>) fromJsonT) {
+    Map<String, dynamic> json,
+  ) {
     return ApiResponseRegister<T>(
-      status: json['status'],
-      message: json['message'],
-      data: json['data'] != null ? fromJsonT(json['data']) : null,
+      status: json['status'] ?? '',
+      message: json['message'] ?? json['messsage'] ?? '',
+      data: json['data'] != null ? User.fromJson(json['data']) : null,
     );
   }
 
-  Map<String, dynamic> toJson(Map<String, dynamic> Function(T) toJsonT) {
+  Map<String, dynamic> toJson() {
     return {
       'status': status,
       'message': message,
-      'data': data != null ? toJsonT(data!) : null,
+      'data': data?.toJson(),
     };
   }
 }

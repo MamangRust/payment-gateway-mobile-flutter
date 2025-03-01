@@ -1,15 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:mobile/pages/auth/registerpage.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mobile/components/auth/custom_button.dart';
+import 'package:mobile/components/auth/custom_social_button.dart';
+import 'package:mobile/components/auth/text_field.dart';
+import 'package:mobile/domain/requests/auth/login.dart';
+import 'package:mobile/pages/auth/register.dart';
+import 'package:go_router/go_router.dart';
+import 'package:mobile/store/auth.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({Key? key}) : super(key: key);
+class LoginScreen extends ConsumerStatefulWidget {
+  const LoginScreen({Key? key}) : super(key: key);
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  _LoginScreenState createState() => _LoginScreenState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
+
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
   bool _isPasswordVisible = false;
   bool _rememberMe = false;
 
@@ -51,11 +62,11 @@ class _LoginPageState extends State<LoginPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Email Field
-                          _buildTextField(
+                          CustomTextField(
                             label: 'Email',
                             hint: 'your.email@example.com',
                             prefixIcon: Icons.email_outlined,
+                            controller: _emailController,
                             validator: (value) {
                               if (value == null || value.isEmpty) {
                                 return 'Please enter your email';
@@ -67,9 +78,10 @@ class _LoginPageState extends State<LoginPage> {
                             },
                           ),
                           const SizedBox(height: 24),
-                          _buildTextField(
+                          CustomTextField(
                             label: 'Password',
                             hint: '••••••••',
+                            controller: _passwordController,
                             prefixIcon: Icons.lock_outline,
                             isPassword: true,
                             isPasswordVisible: _isPasswordVisible,
@@ -134,11 +146,37 @@ class _LoginPageState extends State<LoginPage> {
                             ],
                           ),
                           const SizedBox(height: 32),
-
-                          _buildPrimaryButton(
+                          CustomerButtonPrimary(
                             text: 'Sign In',
-                            onPressed: () {
-                              if (_formKey.currentState!.validate()) {}
+                            onPressed: () async {
+                              if (_formKey.currentState!.validate()) {
+                                final authNotifier =
+                                    ref.read(authProvider.notifier);
+
+                                try {
+                                  await authNotifier.login(
+                                    LoginRequest(
+                                      email: _emailController.text,
+                                      password: _passwordController.text,
+                                    ),
+                                  );
+
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                          content: Text("Login successful!")),
+                                    );
+                                    context.go('/main');
+                                  }
+                                } catch (e) {
+                                  print("Error: $e");
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text(e.toString())),
+                                    );
+                                  }
+                                }
+                              }
                             },
                           ),
                           const SizedBox(height: 32),
@@ -174,21 +212,21 @@ class _LoginPageState extends State<LoginPage> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              _buildSocialButton(
+                              CustomSocialButton(
                                 icon: Icons.g_mobiledata,
                                 backgroundColor: Colors.white,
                                 iconColor: Colors.red,
                                 onPressed: () {},
                               ),
                               const SizedBox(width: 16),
-                              _buildSocialButton(
+                              CustomSocialButton(
                                 icon: Icons.apple,
                                 backgroundColor: Colors.black,
                                 iconColor: Colors.white,
                                 onPressed: () {},
                               ),
                               const SizedBox(width: 16),
-                              _buildSocialButton(
+                              CustomSocialButton(
                                 icon: Icons.facebook,
                                 backgroundColor: const Color(0xFF1877F2),
                                 iconColor: Colors.white,
@@ -212,7 +250,7 @@ class _LoginPageState extends State<LoginPage> {
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) =>
-                                          const RegisterPage(),
+                                          const RegisterScreen(),
                                     ),
                                   );
                                 },
@@ -271,146 +309,6 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTextField({
-    required String label,
-    required String hint,
-    required IconData prefixIcon,
-    bool isPassword = false,
-    bool isPasswordVisible = false,
-    VoidCallback? onPasswordVisibilityToggle,
-    String? Function(String?)? validator,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF334155),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF64748B).withOpacity(0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: TextFormField(
-            obscureText: isPassword && !isPasswordVisible,
-            validator: validator,
-            decoration: InputDecoration(
-              hintText: hint,
-              hintStyle: TextStyle(
-                color: const Color(0xFF94A3B8),
-                fontSize: 14,
-              ),
-              prefixIcon: Icon(
-                prefixIcon,
-                color: const Color(0xFF64748B),
-                size: 20,
-              ),
-              suffixIcon: isPassword
-                  ? IconButton(
-                      icon: Icon(
-                        isPasswordVisible
-                            ? Icons.visibility_outlined
-                            : Icons.visibility_off_outlined,
-                        color: const Color(0xFF64748B),
-                        size: 20,
-                      ),
-                      onPressed: onPasswordVisibilityToggle,
-                    )
-                  : null,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide.none,
-              ),
-              filled: true,
-              fillColor: Colors.white,
-              contentPadding: const EdgeInsets.symmetric(
-                vertical: 16,
-                horizontal: 20,
-              ),
-              errorStyle: const TextStyle(
-                color: Color(0xFFEF4444),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPrimaryButton({
-    required String text,
-    required VoidCallback onPressed,
-  }) {
-    return SizedBox(
-      width: double.infinity,
-      height: 56,
-      child: ElevatedButton(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF2563EB),
-          foregroundColor: Colors.white,
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          shadowColor: const Color(0xFF2563EB).withOpacity(0.3),
-        ),
-        child: Text(
-          text,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSocialButton({
-    required IconData icon,
-    required Color backgroundColor,
-    required Color iconColor,
-    required VoidCallback onPressed,
-  }) {
-    return InkWell(
-      onTap: onPressed,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        width: 56,
-        height: 56,
-        decoration: BoxDecoration(
-          color: backgroundColor,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Icon(
-          icon,
-          color: iconColor,
-          size: 28,
         ),
       ),
     );

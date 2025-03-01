@@ -1,14 +1,11 @@
-class CardMonthTransactionAmount {
+class CardMonthTransferAmount {
   final String month;
   final double totalAmount;
 
-  CardMonthTransactionAmount({
-    required this.month,
-    required this.totalAmount,
-  });
+  CardMonthTransferAmount({required this.month, required this.totalAmount});
 
-  factory CardMonthTransactionAmount.fromJson(Map<String, dynamic> json) {
-    return CardMonthTransactionAmount(
+  factory CardMonthTransferAmount.fromJson(Map<String, dynamic> json) {
+    return CardMonthTransferAmount(
       month: json['month'],
       totalAmount: (json['total_amount'] as num).toDouble(),
     );

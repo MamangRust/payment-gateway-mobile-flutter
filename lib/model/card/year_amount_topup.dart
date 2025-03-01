@@ -1,14 +1,11 @@
-class CardYearlyTransactionAmount {
+class CardYearlyTopupAmount {
   final String year;
   final double totalAmount;
 
-  CardYearlyTransactionAmount({
-    required this.year,
-    required this.totalAmount,
-  });
+  CardYearlyTopupAmount({required this.year, required this.totalAmount});
 
-  factory CardYearlyTransactionAmount.fromJson(Map<String, dynamic> json) {
-    return CardYearlyTransactionAmount(
+  factory CardYearlyTopupAmount.fromJson(Map<String, dynamic> json) {
+    return CardYearlyTopupAmount(
       year: json['year'],
       totalAmount: (json['total_amount'] as num).toDouble(),
     );

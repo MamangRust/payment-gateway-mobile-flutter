@@ -13,8 +13,8 @@ class ApiResponseLogin {
 
   factory ApiResponseLogin.fromJson(Map<String, dynamic> json) {
     return ApiResponseLogin(
-      status: json['status'],
-      message: json['message'],
+      status: json['status'] ?? '',
+      message: json['message'] ?? json['messsage'] ?? '',
       data: json['data'] != null ? TokenResponse.fromJson(json['data']) : null,
     );
   }

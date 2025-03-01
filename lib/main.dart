@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile/components/splash.dart';
-import 'package:mobile/layout/layout_app.dart';
-import 'package:mobile/pages/analytics.dart';
-import 'package:mobile/pages/auth/registerpage.dart';
-import 'package:mobile/pages/auth/loginpage.dart';
+import 'package:mobile/pages/auth/register.dart';
+import 'package:mobile/pages/auth/login.dart';
+import 'package:mobile/provider/auth.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 final GoRouter _router = GoRouter(
@@ -18,24 +18,19 @@ final GoRouter _router = GoRouter(
       builder: (context, state) => const SplashScreen(),
     ),
     GoRoute(
-      name: "analytics",
-      path: "/analytics",
-      builder: (context, state) => const AnalyticsScreen(),
-    ),
-    GoRoute(
       name: 'register',
       path: '/register',
-      builder: (context, state) => const RegisterPage(),
+      builder: (context, state) => const RegisterScreen(),
     ),
     GoRoute(
       name: 'login',
       path: '/login',
-      builder: (context, state) => const LoginPage(),
+      builder: (context, state) => const LoginScreen(),
     ),
     GoRoute(
       name: "main",
       path: "/main",
-      builder: (context, state) => const MainLayout(),
+      builder: (context, state) => const AuthGuard(),
     ),
   ],
 );

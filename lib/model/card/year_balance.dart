@@ -2,10 +2,7 @@ class CardYearlyBalance {
   final String year;
   final double totalBalance;
 
-  CardYearlyBalance({
-    required this.year,
-    required this.totalBalance,
-  });
+  CardYearlyBalance({required this.year, required this.totalBalance});
 
   factory CardYearlyBalance.fromJson(Map<String, dynamic> json) {
     return CardYearlyBalance(
